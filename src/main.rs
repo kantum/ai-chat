@@ -1,38 +1,84 @@
+use cfg_if::cfg_if;
+use ai_chat::app::App;
+
+pub mod api;
+pub mod model;
+
 #[cfg(feature = "ssr")]
-#[tokio::main]
-async fn main() {
-    use axum::{routing::post, Router};
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    // debug logging, disable for prod
+    std::env::set_var("RUST_LOG", "debug");
+    env_logger::init();
+
+    use actix_files::Files;
+    use actix_web::*;
     use leptos::*;
-    use leptos_axum::{generate_route_list, LeptosRoutes};
-    use ai_chat::app::*;
-    use ai_chat::fileserv::file_and_error_handler;
+    use leptos_actix::{generate_route_list, LeptosRoutes};
 
-    simple_logger::init_with_level(log::Level::Debug).expect("couldn't initialize logging");
-
-    // Setting get_configuration(None) means we'll be using cargo-leptos's env values
-    // For deployment these variables are:
-    // <https://github.com/leptos-rs/start-axum#executing-a-server-on-a-remote-machine-without-the-toolchain>
-    // Alternately a file can be specified such as Some("Cargo.toml")
-    // The file would need to be included with the executable when moved to deployment
     let conf = get_configuration(None).await.unwrap();
-    let leptos_options = conf.leptos_options;
-    let addr = leptos_options.site_addr;
-    let routes = generate_route_list(|cx| view! { cx, <App/> }).await;
+    let addr = conf.leptos_options.site_addr;
+    // Generate the list of routes in your Leptos App
+    let routes = generate_route_list(|cx| view! { cx, <App/> });
 
-    // build our application with a route
-    let app = Router::new()
-        .route("/api/*fn_name", post(leptos_axum::handle_server_fns))
-        .leptos_routes(&leptos_options, routes, |cx| view! { cx, <App/> })
-        .fallback(file_and_error_handler)
-        .with_state(leptos_options);
+    #[get("/style.css")]
+    async fn css() -> impl Responder {
+        actix_files::NamedFile::open_async("./style/output.css").await
+    }
 
-    // run our app with hyper
-    // `axum::Server` is a re-export of `hyper::Server`
-    log!("listening on http://{}", &addr);
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
+    let model = web::Data::new(get_language_model());
+    HttpServer::new(move || {
+        let leptos_options = &conf.leptos_options;
+        let site_root = &leptos_options.site_root;
+
+        App::new()
+            .app_data(model.clone())
+            .service(css)
+            .route("/api/{tail:.*}", leptos_actix::handle_server_fns())
+            .leptos_routes(
+                leptos_options.to_owned(),
+                routes.to_owned(),
+                |cx| view! { cx, <App/> },
+            )
+            .service(Files::new("/", site_root))
+    })
+    .bind(&addr)?
+    .run()
+    .await
+}
+
+cfg_if! {
+    if #[cfg(feature = "ssr")] {
+    use llm::models::Llama;
+    use actix_web::*;
+    use std::env;
+    use dotenv::dotenv;
+
+    fn get_language_model() -> Llama {
+            use std::path::PathBuf;
+            dotenv().ok();
+            let model_path = env::var("MODEL_PATH").expect("MODEL_PATH must be set");
+            let model_parameters = llm::ModelParameters {
+                prefer_mmap: true,
+                context_size: 2048,
+                lora_adapters: None,
+                use_gpu: true,
+                gpu_layers: None,
+                rope_overrides: None,
+                n_gqa: None,
+            };
+
+            llm::load::<Llama>(
+                &PathBuf::from(&model_path),
+                llm::TokenizerSource::Embedded,
+                model_parameters,
+                llm::load_progress_callback_stdout,
+            )
+            .unwrap_or_else(|err| {
+                panic!("Failed to load model from {model_path:?}: {err}")
+            })
+        }
+    }
 }
 
 #[cfg(not(feature = "ssr"))]

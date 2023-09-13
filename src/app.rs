@@ -1,50 +1,62 @@
-use crate::error_template::{AppError, ErrorTemplate};
 use leptos::*;
 use leptos_meta::*;
-use leptos_router::*;
+
+mod components;
+
+use crate::api::converse;
+use crate::app::components::chat_area::ChatArea;
+use crate::app::components::type_area::TypeArea;
+use crate::app::components::menu::Menu;
+use crate::model::conversation::{Conversation, Message};
 
 #[component]
 pub fn App(cx: Scope) -> impl IntoView {
     // Provides context that manages stylesheets, titles, meta tags, etc.
     provide_meta_context(cx);
 
+    let (conversation, set_conversation) =
+        create_signal(cx, Conversation::new());
+
+    let send = create_action(cx, move |new_message: &String| {
+        let user_message = Message {
+            text: new_message.clone(),
+            user: true,
+        };
+
+        set_conversation.update(move |c| {
+            c.messages.push(user_message);
+        });
+
+        converse(cx, conversation.get())
+    });
+
+    create_effect(cx, move |_| {
+        if let Some(_) = send.input().get() {
+            let model_message = Message {
+                text: String::from("..."),
+                user: false,
+            };
+
+            set_conversation.update(move |c| {
+                c.messages.push(model_message);
+            });
+        }
+    });
+
+    create_effect(cx, move |_| {
+        if let Some(Ok(response)) = send.value().get() {
+            set_conversation.update(move |c| {
+                c.messages.last_mut().unwrap().text = response;
+            });
+        }
+    });
+
     view! {
         cx,
-
-        // injects a stylesheet into the document <head>
-        // id=leptos means cargo-leptos will hot-reload this stylesheet
         <Stylesheet id="leptos" href="/pkg/ai-chat.css"/>
-
-        // sets the document title
-        <Title text="Welcome to Leptos"/>
-
-        // content for this welcome page
-        <Router fallback=|cx| {
-            let mut outside_errors = Errors::default();
-            outside_errors.insert_with_default_key(AppError::NotFound);
-            view! { cx,
-                <ErrorTemplate outside_errors/>
-            }
-            .into_view(cx)
-        }>
-            <main>
-                <Routes>
-                    <Route path="" view=|cx| view! { cx, <HomePage/> }/>
-                </Routes>
-            </main>
-        </Router>
-    }
-}
-
-/// Renders the home page of your application.
-#[component]
-fn HomePage(cx: Scope) -> impl IntoView {
-    // Creates a reactive value to update the button
-    let (count, set_count) = create_signal(cx, 0);
-    let on_click = move |_| set_count.update(|count| *count += 1);
-
-    view! { cx,
-        <h1>"Welcome to Leptos!"</h1>
-        <button on:click=on_click>"Click Me: " {count}</button>
+        <Title text="AI Chat"/>
+        <Menu/>
+        <ChatArea conversation/>
+        <TypeArea send/>
     }
 }
