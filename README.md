@@ -1,6 +1,8 @@
 # Full Rust AI Chat
 
-This is an implentation of an AI Chat as shown by Code to the Moon youtube channel.
+This is an implentation of an AI Chat inspired by Code to the Moon youtube channel.
+
+Don't worry if the chat takes time to answer, the model is running on your computer, watch your activity monitor.
 
 As it contains the language model, make sure to have git-lfs installed before cloning the repository:
 ```shell
@@ -16,6 +18,7 @@ cargo install --locked cargo-leptos
 
 ## Running the project for dev
 
+In two terminals:
 ```shell
 npx tailwindcss -i ./input.css -o ./style/output.css --watch
 ```
