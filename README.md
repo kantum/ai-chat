@@ -5,7 +5,8 @@ This is an implentation of an AI Chat as shown by Code to the Moon youtube chann
 As it contains the language model, make sure to have git-lfs installed before cloning the repository:
 ```shell
 git lfs install
-git clone
+git clone git@github.com:kantum/ai-chat.git
+cd ai-chat
 ```
 
 You will need the cargo leptos cli to build the app:
@@ -15,27 +16,31 @@ cargo install --locked cargo-leptos
 
 ## Running the project for dev
 
-```bash
+```shell
 npx tailwindcss -i ./input.css -o ./style/output.css --watch
 ```
 
-```bash
+```shell
 cargo leptos watch
 ```
 
 ## Compiling for Release
-```bash
+```shell
 cargo leptos build --release
 ```
-
 Will generate your server binary in target/server/release and your site package in target/site
 
+## Run the Release Binary
+```shell
+./target/server/release/ai-chat
+```
+
 ## Testing Your Project
-```bash
+```shell
 cargo leptos end-to-end
 ```
 
-```bash
+```shell
 cargo leptos end-to-end --release
 ```
 
