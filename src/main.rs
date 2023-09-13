@@ -1,4 +1,3 @@
-use ai_chat::app::App;
 use cfg_if::cfg_if;
 
 pub mod api;

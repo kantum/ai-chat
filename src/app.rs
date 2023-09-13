@@ -31,7 +31,7 @@ pub fn App(cx: Scope) -> impl IntoView {
     });
 
     create_effect(cx, move |_| {
-        if let Some(_) = send.input().get() {
+        if send.input().get().is_some() {
             let model_message = Message {
                 text: String::from("..."),
                 user: false,
