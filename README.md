@@ -4,10 +4,9 @@ This is an implentation of an AI Chat inspired by Code to the Moon youtube chann
 
 Don't worry if the chat takes time to answer, the model is running on your computer, watch your activity monitor.
 
-As it contains the language model, make sure to have git-lfs installed before cloning the repository:
+As it contains the language model, make sure to have [git-lfs installed](https://docs.github.com/en/repositories/working-with-files/managing-large-files/installing-git-large-file-storage) before cloning the repository:
 ```shell
-git lfs install
-git clone git@github.com:kantum/ai-chat.git
+git lfs install && git clone --recurse-submodules git@github.com:kantum/ai-chat.git
 cd ai-chat
 ```
 
