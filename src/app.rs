@@ -5,8 +5,8 @@ mod components;
 
 use crate::api::converse;
 use crate::app::components::chat_area::ChatArea;
-use crate::app::components::type_area::TypeArea;
 use crate::app::components::menu::Menu;
+use crate::app::components::type_area::TypeArea;
 use crate::model::conversation::{Conversation, Message};
 
 #[component]
@@ -55,8 +55,10 @@ pub fn App(cx: Scope) -> impl IntoView {
         cx,
         <Stylesheet id="leptos" href="/pkg/ai-chat.css"/>
         <Title text="AI Chat"/>
-        <Menu/>
-        <ChatArea conversation/>
-        <TypeArea send/>
+        <div class="flex h-screen flex-col bg-slate-800">
+            <Menu/>
+            <ChatArea conversation/>
+            <TypeArea send/>
+        </div>
     }
 }

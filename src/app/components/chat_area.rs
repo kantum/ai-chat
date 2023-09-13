@@ -2,9 +2,9 @@ use crate::model::conversation::Conversation;
 use leptos::{html::Div, *};
 
 const USER_MESSAGE_CLASS: &str =
-    "max-w-md p-4 mb-5 rounded-lg self-end bg-blue-500 text-white";
+    "max-w-md flex items-center self-end rounded-xl rounded-br bg-blue-500 py-2 px-3 text-white";
 const MODEL_MESSAGE_CLASS: &str =
-    "max-w-md p-4 mb-5 rounded-lg self-start bg-gray-200 text-black";
+    "max-w-md flex items-center self-start rounded-xl rounded-bl bg-slate-700 py-2 px-3 text-white";
 
 #[component]
 pub fn ChatArea(
@@ -22,12 +22,14 @@ pub fn ChatArea(
 
     view! {
         cx,
-        <div class="w-full flex flex-col p-3 overflow-auto" node_ref=chat_div_ref>
+        <div class="flex-grow overflow-y-auto bg-slate-800 no-scrollbar" node_ref=chat_div_ref>
         { move || conversation.get().messages.iter().map(move |message| {
             let class_str = if message.user { USER_MESSAGE_CLASS } else { MODEL_MESSAGE_CLASS };
             view! {cx,
+                <div class="flex flex-col space-y-2 p-4">
                 <div class={class_str}>
                 {message.text.clone()}
+                </div>
                 </div>
             }
         }).collect::<Vec<_>>()

@@ -3,16 +3,22 @@
 @tailwind utilities;
 
 @layer components {
-    .testing-class {
-        @apply bg-gray-800;
+    /* .text-area { */
+    /*     @apply w-full flex items-stretch border-none resize-none focus:outline-none focus:ring-0 placeholder-gray-500; */
+    /* } */
+}
+
+@layer utilities {
+  @variants responsive {
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
     }
-    .text-area {
-        @apply w-full flex items-stretch border-none resize-none focus:outline-none focus:ring-0 placeholder-gray-500;
+
+    /* Hide scrollbar for IE, Edge and Firefox */
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
     }
-    .sidebar-icon {
-        @apply relative flex items-center justify-center
-                h-12 w-12 mt-2 mb-2 mx-auto shadow-lg
-                bg-gray-800 text-green-500
-                hover:bg-green-600;
-    }
+  }
 }

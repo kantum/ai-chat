@@ -1,5 +1,5 @@
-use cfg_if::cfg_if;
 use ai_chat::app::App;
+use cfg_if::cfg_if;
 
 pub mod api;
 pub mod model;
